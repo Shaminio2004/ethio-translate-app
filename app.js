@@ -7,6 +7,12 @@ const DOM = {};
 let history = JSON.parse(localStorage.getItem('ethioHist')||'[]');
 renderHistory();
 
+const TRANSLATE_ENDPOINTS = [
+  'https://libretranslate.de/translate',
+  'https://libretranslate.com/translate'
+];
+const TRANSLATE_TIMEOUT_MS = 10000;
+
 DOM.btnType.onclick   = ()=>{ showStage(); DOM.ocrText.focus(); };
 DOM.btnFile.onclick   = ()=>DOM.fileInput.click();
 DOM.fileInput.onchange= e=>handleFile(e.target.files[0]);
@@ -54,23 +60,23 @@ async function doTranslate(){
   const src=DOM.ocrText.value.trim(); if(!src)return;
   DOM.transText.value='Translating…';
   DOM.error.textContent='';
-  try{
-    const sourceLang = DOM.sourceLang?.value || 'auto';
-    const res = await fetch('https://libretranslate.de/translate',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({q:src,source:sourceLang,target:'en',format:'text'})
-    });
-    if(!res.ok){
-      const errorBody = await res.json().catch(()=>({}));
-      throw new Error(errorBody.error || `Translation request failed (${res.status})`);
+  const sourceLang = DOM.sourceLang?.value || 'auto';
+  const payload = {q:src,source:sourceLang,target:'en',format:'text'};
+  let lastError;
+  for(const endpoint of TRANSLATE_ENDPOINTS){
+    try{
+      const translatedText = await requestTranslation(endpoint, payload);
+      if(translatedText){
+        DOM.transText.value=translatedText;
+        return;
+      }
+      lastError = new Error('Translation unavailable');
+    }catch(error){
+      lastError = error;
     }
-    const data = await res.json();
-    DOM.transText.value=data.translatedText||'Translation unavailable';
-  }catch{
-    DOM.transText.value='Translation unavailable';
-    showError('Translation failed. Please try again.');
   }
+  DOM.transText.value='Translation unavailable';
+  showError(lastError?.message || 'Translation failed. Please try again.');
 }
 /* ---- ui helpers ---- */
 function showStage(){ DOM.home.hidden=true; DOM.stage.hidden=false; }
@@ -87,4 +93,29 @@ function renderHistory(){
     const idx=[...DOM.histList.children].indexOf(e.target.closest('li'));
     if(idx>=0&&idx<history.length){ DOM.ocrText.value=history[idx].orig; DOM.transText.value=history[idx].trans; showStage(); }
   };
+}
+
+async function requestTranslation(endpoint, payload){
+  const controller = new AbortController();
+  const timeoutId = setTimeout(()=>controller.abort(), TRANSLATE_TIMEOUT_MS);
+  try{
+    const res = await fetch(endpoint,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(payload),
+      signal:controller.signal
+    });
+    const data = await res.json().catch(()=>({}));
+    if(!res.ok){
+      throw new Error(data.error || `Translation request failed (${res.status})`);
+    }
+    return data.translatedText || '';
+  }catch(error){
+    if(error?.name === 'AbortError'){
+      throw new Error('Translation timed out. Please try again.');
+    }
+    throw error;
+  }finally{
+    clearTimeout(timeoutId);
+  }
 }
