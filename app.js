@@ -76,6 +76,7 @@ async function doTranslate(){
   };
 
   let lastError;
+
   for(const endpoint of TRANSLATE_ENDPOINTS){
     try{
       const translatedText = await requestTranslation(endpoint, payload);
@@ -134,6 +135,7 @@ async function requestTranslation(endpoint, payload){
     clearTimeout(timeoutId);
   }
 }
+
 
 
 
