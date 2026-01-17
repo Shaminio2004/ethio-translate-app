@@ -62,7 +62,13 @@ async function doTranslate(){
   DOM.transText.value='Translating…';
   DOM.error.textContent='';
   const sourceLang = DOM.sourceLang?.value || 'auto';
-  const payload = {q:src,source:sourceLang,target:'en',format:'text'};
+  const payload = {
+  q: DOM.srcText.value.trim(),
+  source: sourceLang || "auto",
+  target: "en",
+  format: "text"
+};
+
   let lastError;
   for(const endpoint of TRANSLATE_ENDPOINTS){
     try{
@@ -120,4 +126,5 @@ async function requestTranslation(endpoint, payload){
     clearTimeout(timeoutId);
   }
 }
+
 
