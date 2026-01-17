@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Ethio Translate – Amharic & Tigrinya to English</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkV0aGlvIFRyYW5zbGF0ZSIsCiAgInNob3J0X25hbWUiOiAiRXRoaW8iLAogICJzdGFydF91cmwiOiAiLiIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiI2ZmZmZmZiIsCiAgInRoZW1lX2NvbG9yIjogIiNmZmZmZmYiCn0=" />
+</head>
+<body>
+<main class="wrap">
+  <h1 class="logo">Ethio Translate</h1>
+  <p class="tagline">Amharic • Tigrinya → English</p>
+
+  <!-- THREE BIG OPTIONS -->
+  <section id="home" class="card">
+    <button id="btnType" class="bigBtn">✏️ Type Text</button>
+    <button id="btnFile" class="bigBtn">📄 Upload File</button>
+    <button id="btnCam" class="bigBtn">📷 Take Photo</button>
+    <input hidden id="fileInput" accept="image/*,.pdf" type="file" />
+    <video hidden id="video" playsinline></video>
+    <canvas hidden id="canvas"></canvas>
+  </section>
+
+  <!-- OCR + TRANSLATE AREA -->
+  <section id="stage" hidden class="card">
+    <label class="label">Extracted text (edit if needed)</label>
+    <textarea id="ocrText" rows="6"></textarea>
+
+    <div id="confidence" class="pill">Confidence: <span></span></div>
+
+    <button id="btnTranslate" class="bigBtn primary">Translate</button>
+
+    <label class="label">English</label>
+    <textarea id="transText" rows="6" readonly></textarea>
+
+    <div class="actions">
+      <button id="btnCopy">Copy</button>
+      <button id="btnShare">Share</button>
+      <button id="btnSave">Save</button>
+      <label class="sideToggle">
+        <input id="sideCheck" type="checkbox" /> Side-by-side
+      </label>
+    </div>
+
+    <p id="error" class="error"></p>
+    <button id="btnBack" class="textBtn">← Start over</button>
+  </section>
+
+  <!-- HISTORY -->
+  <aside id="history" class="card">
+    <h2>Recent</h2>
+    <ul id="histList"></ul>
+    <button id="btnClearHist" class="textBtn">Clear history</button>
+  </aside>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script type="module" src="app.js"></script>
+</body>
+</html>

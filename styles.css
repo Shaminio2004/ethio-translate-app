@@ -1,0 +1,32 @@
+:root{
+  --accent:#1e88e5;
+  --danger:#e53935;
+  --bg:#ffffff;
+  --text:#212121;
+  --gray:#757575;
+  font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  font-size:20px;
+  line-height:1.5;
+}
+* {box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);padding:1rem}
+.wrap{max-width:700px;margin:auto}
+.logo{font-size:2rem;font-weight:700;margin-bottom:.25rem}
+.tagline{color:var(--gray);margin-bottom:2rem}
+.card{background:#fff;border:1px solid #e0e0e0;border-radius:12px;padding:1.5rem;margin-bottom:1.5rem}
+.bigBtn{display:block;width:100%;font-size:1.25rem;padding:1rem;margin:.75rem 0;border:2px solid var(--accent);background:#fff;color:var(--accent);border-radius:10px;cursor:pointer;transition:.2s}
+.bigBtn.primary{background:var(--accent);color:#fff}
+.bigBtn:hover{transform:translateY(-2px)}
+label.label{display:block;margin:1rem 0 .5rem;font-weight:600}
+textarea{width:100%;font-size:1.1rem;padding:.75rem;border:1px solid #bdbdbd;border-radius:8px;resize:vertical}
+.pill{display:inline-block;font-size:.9rem;background:#eceff1;padding:.25rem .75rem;border-radius:20px;margin:.5rem 0}
+.error{color:var(--danger);margin-top:1rem}
+.actions{display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1rem}
+.actions button{padding:.5rem 1rem;font-size:1rem;border:1px solid var(--accent);background:#fff;color:var(--accent);border-radius:8px;cursor:pointer}
+.textBtn{background:none;border:none;color:var(--accent);cursor:pointer;font-size:1rem;margin-top:1rem}
+#history h2{font-size:1.25rem;margin-bottom:.5rem}
+#histList{list-style:none;padding-left:0}
+#histList li{padding:.5rem 0;border-bottom:1px solid #e0e0e0;cursor:pointer}
+.sideToggle{font-size:.9rem;color:var(--gray)}
+#stage.sideBySide{display:flex;gap:1rem}
+#stage.sideBySide textarea{flex:1}
