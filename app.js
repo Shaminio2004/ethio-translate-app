@@ -8,9 +8,10 @@ let history = JSON.parse(localStorage.getItem('ethioHist')||'[]');
 renderHistory();
 
 const TRANSLATE_ENDPOINTS = [
-  'https://libretranslate.de/translate',
+  'https://translate.argosopentech.com/translate',
   'https://libretranslate.com/translate'
 ];
+
 const TRANSLATE_TIMEOUT_MS = 10000;
 
 DOM.btnType.onclick   = ()=>{ showStage(); DOM.ocrText.focus(); };
@@ -119,3 +120,4 @@ async function requestTranslation(endpoint, payload){
     clearTimeout(timeoutId);
   }
 }
+
