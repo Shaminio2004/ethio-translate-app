@@ -60,13 +60,14 @@ async function doTranslate(){
   const src=DOM.ocrText.value.trim(); if(!src)return;
   DOM.transText.value='Translating…';
   DOM.error.textContent='';
-  const sourceLang = DOM.sourceLang?.value || 'auto';
-  const payload = {
+  const sourceLang = DOM.sourceLang.value || "auto";
+const payload = {
   q: DOM.srcText.value.trim(),
-  source: sourceLang || "auto",
+  source: sourceLang,
   target: "en",
   format: "text"
 };
+
 
   let lastError;
   for(const endpoint of TRANSLATE_ENDPOINTS){
@@ -125,6 +126,7 @@ async function requestTranslation(endpoint, payload){
     clearTimeout(timeoutId);
   }
 }
+
 
 
 
