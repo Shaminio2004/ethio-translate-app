@@ -57,23 +57,30 @@ async function runOCR(src){
 function confidenceBand(c){ if(c>80)return'High'; if(c>55)return'Medium'; return'Low'; }
 /* ---- translate ---- */
 async function doTranslate(){
-  const src=DOM.ocrText.value.trim(); if(!src)return;
-  DOM.transText.value='Translating…';
-  DOM.error.textContent='';
-const sourceLang = (DOM.sourceLang && DOM.sourceLang.value) ? DOM.sourceLang.value : "auto";
-const payload = {
-  q: src,              // <-- use OCR text
-  source: sourceLang,
-  target: "en",
-  format: "text"
-};
+  const src = (DOM.ocrText?.value || '').trim();
+  if(!src){
+    showError('No text to translate. Add text or run OCR first.');
+    return;
+  }
+
+  DOM.transText.value = 'Translating…';
+  DOM.error.textContent = '';
+
+  const sourceLang = (DOM.sourceLang?.value || 'auto');
+
+  const payload = {
+    q: src,
+    source: sourceLang,
+    target: 'en',
+    format: 'text'
+  };
 
   let lastError;
   for(const endpoint of TRANSLATE_ENDPOINTS){
     try{
       const translatedText = await requestTranslation(endpoint, payload);
       if(translatedText){
-        DOM.transText.value=translatedText;
+        DOM.transText.value = translatedText;
         return;
       }
       lastError = new Error('Translation unavailable');
@@ -81,9 +88,11 @@ const payload = {
       lastError = error;
     }
   }
-  DOM.transText.value='Translation unavailable';
+
+  DOM.transText.value = 'Translation unavailable';
   showError(lastError?.message || 'Translation failed. Please try again.');
 }
+
 /* ---- ui helpers ---- */
 function showStage(){ DOM.home.hidden=true; DOM.stage.hidden=false; }
 function showError(msg){ DOM.error.textContent=msg; }
@@ -125,6 +134,7 @@ async function requestTranslation(endpoint, payload){
     clearTimeout(timeoutId);
   }
 }
+
 
 
 
