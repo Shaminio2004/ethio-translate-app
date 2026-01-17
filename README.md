@@ -1,2 +1,2 @@
 # ethio-translate-app
-translates Tigrigna language into English language.
+Translates Amharic and Tigrinya into English.

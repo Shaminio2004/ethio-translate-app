@@ -41,7 +41,7 @@ async function startCamera(){
 /* ---- OCR ---- */
 async function runOCR(src){
   showStage(); DOM.ocrText.value='Reading…';
-  const worker = await Tesseract.createWorker('amh+eng');
+  const worker = await Tesseract.createWorker('amh+tir+eng');
   const {data:{text,confidence}} = await worker.recognize(src);
   await worker.terminate();
   DOM.ocrText.value=text;
@@ -53,12 +53,18 @@ function confidenceBand(c){ if(c>80)return'High'; if(c>55)return'Medium'; return
 async function doTranslate(){
   const src=DOM.ocrText.value.trim(); if(!src)return;
   DOM.transText.value='Translating…';
-  const res = await fetch('https://libretranslate.de/translate',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({q:src,source:'auto',target:'en',format:'text'})
-  }).then(r=>r.json());
-  DOM.transText.value=res.translatedText||'Translation unavailable';
+  DOM.error.textContent='';
+  try{
+    const res = await fetch('https://libretranslate.de/translate',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({q:src,source:'auto',target:'en',format:'text'})
+    }).then(r=>r.json());
+    DOM.transText.value=res.translatedText||'Translation unavailable';
+  }catch{
+    DOM.transText.value='Translation unavailable';
+    showError('Translation failed. Please try again.');
+  }
 }
 /* ---- ui helpers ---- */
 function showStage(){ DOM.home.hidden=true; DOM.stage.hidden=false; }
