@@ -8,8 +8,7 @@ let history = JSON.parse(localStorage.getItem('ethioHist')||'[]');
 renderHistory();
 
 const TRANSLATE_ENDPOINTS = [
-  "https://libretranslate.de/translate",
-  "https://translate.astian.org/translate"
+  "https://ethio-translate-proxy.zagwerestaurant.workers.dev/"
 ];
 const TRANSLATE_TIMEOUT_MS = 10000;
 
@@ -142,6 +141,7 @@ async function requestTranslation(endpoint, payload){
     clearTimeout(timeoutId);
   }
 }
+
 
 
 
