@@ -8,7 +8,8 @@ let history = JSON.parse(localStorage.getItem('ethioHist')||'[]');
 renderHistory();
 
 const TRANSLATE_ENDPOINTS = [
-  "https://libretranslate.com/translate"
+  "https://libretranslate.de/translate",
+  "https://translate.astian.org/translate"
 ];
 const TRANSLATE_TIMEOUT_MS = 10000;
 
@@ -121,9 +122,15 @@ async function requestTranslation(endpoint, payload){
       body:JSON.stringify(payload),
       signal:controller.signal
     });
-    const data = await res.json().catch(()=>({}));
+    const contentType = res.headers.get('content-type') || '';
+    const data = contentType.includes('application/json')
+      ? await res.json().catch(()=>({}))
+      : {};
+    const errorText = !contentType.includes('application/json')
+      ? await res.text().catch(()=>'')
+      : '';
     if(!res.ok){
-      throw new Error(data.error || `Translation request failed (${res.status})`);
+      throw new Error(data.error || errorText || `Translation request failed (${res.status})`);
     }
     return data.translatedText || '';
   }catch(error){
