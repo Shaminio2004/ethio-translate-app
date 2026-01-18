@@ -56,12 +56,35 @@ async function runOCR(src){
 }
 function confidenceBand(c){ if(c>80)return'High'; if(c>55)return'Medium'; return'Low'; }
 /* ---- translate ---- */
-async function doTranslate(){
+async function doTranslate() {
   const src = (DOM.ocrText?.value || '').trim();
-  if(!src){
+  if (!src) {
     showError('No text to translate. Add text or run OCR first.');
     return;
   }
+
+   DOM.transText.value = 'Translating…';
+  DOM.error.textContent = '';
+
+  const payload = {
+    q: src,
+    source: DOM.sourceLang?.value || 'auto',
+    target: 'en',
+    format: 'text'
+  };
+
+  try {
+    const translatedText = await requestTranslation(
+      TRANSLATE_ENDPOINTS[0],
+      payload
+    );
+    DOM.transText.value = translatedText || 'Translation unavailable';
+  } catch (err) {
+    DOM.transText.value = 'Translation unavailable';
+    showError(err.message);
+  }
+}
+
 
   DOM.transText.value = 'Translating…';
   DOM.error.textContent = '';
@@ -141,6 +164,7 @@ async function requestTranslation(endpoint, payload){
     clearTimeout(timeoutId);
   }
 }
+
 
 
 
