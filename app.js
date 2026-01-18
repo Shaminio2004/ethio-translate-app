@@ -7,14 +7,25 @@ const DOM = {};
 let history = JSON.parse(localStorage.getItem('ethioHist')||'[]');
 renderHistory();
 
+window.addEventListener('DOMContentLoaded', () => {
+  const btnFile = document.getElementById('btnFile');
+  const fileInput = document.getElementById('fileInput');
+  if (btnFile && fileInput) {
+    btnFile.addEventListener('click', () => fileInput.click());
+  } else {
+    console.error('Upload controls missing: btnFile or fileInput not found.');
+  }
+});
+
 const TRANSLATE_ENDPOINTS = [
-  "https://ethio-translate-proxy.zagwerestaurant.workers.dev/"
+  {type:'libre', url:"https://libretranslate.de/translate"},
+  {type:'libre', url:"https://translate.astian.org/translate"},
+  {type:'google', url:"https://translate.googleapis.com/translate_a/single"}
 ];
 const TRANSLATE_TIMEOUT_MS = 10000;
 
 
 DOM.btnType.onclick   = ()=>{ showStage(); DOM.ocrText.focus(); };
-DOM.btnFile.onclick   = ()=>DOM.fileInput.click();
 DOM.fileInput.onchange= e=>handleFile(e.target.files[0]);
 DOM.btnCam.onclick    = startCamera;
 DOM.btnTranslate.onclick = doTranslate;
@@ -138,7 +149,27 @@ async function requestTranslation(endpoint, payload){
   const controller = new AbortController();
   const timeoutId = setTimeout(()=>controller.abort(), TRANSLATE_TIMEOUT_MS);
   try{
-    const res = await fetch(endpoint,{
+    if(endpoint.type === 'google'){
+      const query = new URLSearchParams({
+        client:'gtx',
+        sl: payload.source || 'auto',
+        tl: payload.target || 'en',
+        dt:'t',
+        q: payload.q
+      });
+      const res = await fetch(`${endpoint.url}?${query.toString()}`,{
+        method:'GET',
+        signal:controller.signal
+      });
+      const data = await res.json().catch(()=>null);
+      if(!res.ok || !Array.isArray(data)){
+        throw new Error(`Translation request failed (${res.status})`);
+      }
+      const translated = data?.[0]?.map(part=>part?.[0]).filter(Boolean).join('') || '';
+      return translated;
+    }
+
+    const res = await fetch(endpoint.url,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify(payload),
@@ -154,7 +185,7 @@ async function requestTranslation(endpoint, payload){
     if(!res.ok){
       throw new Error(data.error || errorText || `Translation request failed (${res.status})`);
     }
-    return data.translatedText || '';
+    return data.translatedText || data.translation || '';
   }catch(error){
     if(error?.name === 'AbortError'){
       throw new Error('Translation timed out. Please try again.');
