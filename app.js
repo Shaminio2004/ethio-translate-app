@@ -8,7 +8,9 @@ let history = JSON.parse(localStorage.getItem('ethioHist')||'[]');
 renderHistory();
 
 const TRANSLATE_ENDPOINTS = [
-  "https://libretranslate.com/translate"
+  {type:'libre', url:"https://libretranslate.de/translate"},
+  {type:'libre', url:"https://translate.astian.org/translate"},
+  {type:'google', url:"https://translate.googleapis.com/translate_a/single"}
 ];
 const TRANSLATE_TIMEOUT_MS = 10000;
 
@@ -115,17 +117,43 @@ async function requestTranslation(endpoint, payload){
   const controller = new AbortController();
   const timeoutId = setTimeout(()=>controller.abort(), TRANSLATE_TIMEOUT_MS);
   try{
-    const res = await fetch(endpoint,{
+    if(endpoint.type === 'google'){
+      const query = new URLSearchParams({
+        client:'gtx',
+        sl: payload.source || 'auto',
+        tl: payload.target || 'en',
+        dt:'t',
+        q: payload.q
+      });
+      const res = await fetch(`${endpoint.url}?${query.toString()}`,{
+        method:'GET',
+        signal:controller.signal
+      });
+      const data = await res.json().catch(()=>null);
+      if(!res.ok || !Array.isArray(data)){
+        throw new Error(`Translation request failed (${res.status})`);
+      }
+      const translated = data?.[0]?.map(part=>part?.[0]).filter(Boolean).join('') || '';
+      return translated;
+    }
+
+    const res = await fetch(endpoint.url,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify(payload),
       signal:controller.signal
     });
-    const data = await res.json().catch(()=>({}));
+    const contentType = res.headers.get('content-type') || '';
+    const data = contentType.includes('application/json')
+      ? await res.json().catch(()=>({}))
+      : {};
+    const errorText = !contentType.includes('application/json')
+      ? await res.text().catch(()=>'')
+      : '';
     if(!res.ok){
-      throw new Error(data.error || `Translation request failed (${res.status})`);
+      throw new Error(data.error || errorText || `Translation request failed (${res.status})`);
     }
-    return data.translatedText || '';
+    return data.translatedText || data.translation || '';
   }catch(error){
     if(error?.name === 'AbortError'){
       throw new Error('Translation timed out. Please try again.');
